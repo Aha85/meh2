@@ -20,7 +20,7 @@ Feeds are built to be bright: red badges, colorful thumbnails, flashy promos. ME
 - **Questions at the door.** Each visit starts with what you're here for and one sentence about it. Past 50% and 80% of your daily time, there are more questions. Past 80% there is also a one-minute wait.
 - **A daily limit and a visit limit.** You set both. Defaults: 45 minutes a day, 5 minutes a visit.
 - **Nudges when time is up.** A popup jumps up, then keeps coming back more often. You can always close it. Nothing is blocked.
-- **A visit ends after 2 minutes without input.** If you don't move the mouse, press a key or scroll for 2 minutes, MEH MODE decides you left. The timer disappears, and the next time you touch the page the entry question comes back. Watching a long video without touching the page counts as leaving. Time you spend untouched is not counted against your day.
+- **A visit ends after 2 minutes without input.** If you don't move the mouse, press a key or scroll for 2 minutes, MEH MODE decides you left. The timer disappears, and the next time you touch the page the entry question comes back. Watching a long video without touching the page counts as leaving. Those 2 minutes still count against your day, but nothing counts after the visit ends.
 - **A live timer.** A small timer on the page shows what is left of this visit and of today. Drag it where you like, or shrink it. The panel shows the same numbers.
 - **Turning the limits off takes a sentence.** To switch a site off, you write why. The questions, nudges and timer stop on that site until the next daily reset, then they come back by themselves. The gray stays: hold the button to peek in color.
 
