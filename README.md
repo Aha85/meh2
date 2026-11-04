@@ -25,6 +25,8 @@ Feeds are built to be bright: red badges, colorful thumbnails, flashy promos. ME
 
 ![Holding the button shows color only while held](screenshots/2-hold-to-peek.png)
 
+<img src="screenshots/3-turn-off-question.png" width="340" alt="Switching a site off opens a box under the site list asking why">
+
 ## The settings panel
 
 Click the MEH MODE icon to open the panel.
