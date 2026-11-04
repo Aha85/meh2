@@ -28,7 +28,7 @@ h1 { font-size: 25px; font-weight: 800; letter-spacing: -1px; margin: 0 0 4px; l
 .tagline { margin: 0; font-size: 13px; color: var(--muted); }
 h2 { font-size: 14px; font-weight: 600; margin: 0; }
 .current { padding: 14px; margin: 0 -8px 16px; background: #ffe14a; border-radius: 8px; }
-#pause-form { margin-top: 16px; }
+#pause-form { margin-top: 12px; padding: 14px; background: #ffe14a; border-radius: 8px; }
 #pause-form label { font-weight: 600; line-height: 1.5; display: block; }
 textarea { width: 100%; margin-top: 8px; padding: 9px; font: inherit; border: 1px solid var(--ink); border-radius: 4px; resize: vertical; }
 textarea:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }

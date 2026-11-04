@@ -4,7 +4,9 @@ import { PURPOSES, usageFor, charge, remainingSeconds, overrunReason } from "../
 import { frictionLevel } from "../meh2/friction.js";
 import { GRACE_MS, isPinned, gapAfter } from "../meh2/nudges.js";
 
-const SETTINGS = "meh2Settings", USAGE = "meh2Usage", VISITS = "meh2Visits";
+import { activePauses, pause, resume } from "../meh2/paused.js";
+
+const SETTINGS = "meh2Settings", USAGE = "meh2Usage", VISITS = "meh2Visits", PAUSED = "meh2Paused";
 export const IDLE_MS = 120e3;
 const MAX_TICK_MS = 10e3;
 
@@ -130,10 +132,18 @@ function panelModel(settings, limits, usage) {
     remaining: { global: Math.floor(remainingSeconds(usage, limits) / 60) }
   };
 }
+export const pausedSites = async (now = Date.now()) => activePauses((await chrome.storage.local.get(PAUSED))[PAUSED], now);
+
 // Side-panel messages.
 export async function handlePanel(message, now = Date.now()) {
   const { settings, limits, usage } = await load(now);
   if (message.type === "MEH2_GET") return panelModel(settings, limits, usage);
+  if (message.type === "MEH2_PAUSE" || message.type === "MEH2_RESUME") {
+    const paused = await pausedSites(now);
+    const next = message.type === "MEH2_PAUSE" ? pause(paused, message.id, now, limits.resetHour) : resume(paused, message.id);
+    await chrome.storage.local.set({ [PAUSED]: next });
+    return { ok: true };
+  }
   // The panel's live timer: time left today, and in the visit on the panel's tab, if any.
   if (message.type === "MEH2_TIME") {
     const visit = (await visits())[message.tabId];

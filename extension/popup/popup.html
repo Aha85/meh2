@@ -27,12 +27,6 @@
         <span>Hold to peek in color</span>
       </button>
       <p id="peek-help" class="hint">Just this page. Release to return to grayscale.</p>
-      <form id="pause-form" hidden>
-        <label for="reason">What are you here to do, and why do you need color?</label>
-        <textarea id="reason" rows="3" required maxlength="500" placeholder="Write your answer to continue." aria-describedby="reason-help"></textarea>
-        <p id="reason-help" class="hint">Only this visit, in this tab. Reloading restores grayscale. Your answer is never saved or sent.</p>
-        <div class="pause-actions"><button id="confirm-pause" type="submit" disabled>Turn off for this visit</button><button id="cancel-pause" type="button">Keep it meh</button></div>
-      </form>
     </section>
 
     <section class="sites meh2" aria-labelledby="meh2-heading">
@@ -58,13 +52,19 @@
       <div class="section-heading"><h2 id="sites-heading">Where to meh</h2><span id="site-summary">All off</span></div>
       <p id="first-run" class="intro">Choose your sites. Keep what you came for.</p>
       <div id="site-list"></div>
-      <p class="permission-note">Enable sites once. To turn one off, open it and answer a question. Off lasts only for that visit.</p>
+      <form id="pause-form" hidden>
+        <label id="reason-label" for="reason">Why turn off the limits on this site?</label>
+        <textarea id="reason" rows="3" required maxlength="500" placeholder="Write your answer to continue." aria-describedby="reason-help"></textarea>
+        <p id="reason-help" class="hint">Questions, reminders and the timer stop on this site until the next reset. Grayscale stays. Your answer is never saved or sent.</p>
+        <div class="pause-actions"><button id="confirm-pause" type="submit" disabled>Turn off until reset</button><button id="cancel-pause" type="button">Keep the limits</button></div>
+      </form>
+      <p class="permission-note">Enable sites once. A switch turns off a site's limits after one question, until the next reset. Grayscale stays: hold the button above for color.</p>
     </section>
 
     <p id="error" class="error" role="alert" hidden></p>
     <footer>
       <button id="about-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="about">About &amp; privacy</button>
-      <span class="version">v0.4.11</span>
+      <span class="version">v0.4.12</span>
     </footer>
     <section id="about" class="about" hidden>
       <h2>Why MEH MODE?</h2>
@@ -72,12 +72,12 @@
       <p>MEH MODE makes the sites you choose feel quieter without blocking them. Everything still works, but there is less color competing for your attention.</p>
       <h3>How it works</h3>
       <p>Choose your sites and browse normally in grayscale. Need color? Hold <strong>Peek in color</strong>. Release it and the page goes back to gray.</p>
-      <p>Turning grayscale off asks you to write why. Your answer is not judged or saved. It simply gives you a moment to decide what you want to do.</p>
+      <p>Turning a site's limits off asks you to write why. Your answer is not judged or saved. It simply gives you a moment to decide what you want to do.</p>
       <p class="honest-note">We are still testing whether this helps people scroll less while getting their work done. It may not work the same way for everyone.</p>
       <h3>Stays on your device</h3>
       <p>Only your site choices, your daily limits and today's minutes used are saved. No accounts, browsing history, analytics, or data sent by MEH MODE. What you type in the entry questions is erased when you go in.</p>
       <p>MEH MODE needs permission to change the appearance of the social sites you choose. It uses this access only to apply or remove grayscale. It does not read, save, or send your posts, messages, form entries, or other page content.</p>
-      <p>Visit-only OFF keeps website access so grayscale returns next visit. Answers are never saved or sent. You can revoke access or uninstall through Chrome.</p>
+      <p>Turning limits off keeps website access, and they return at the next reset. Answers are never saved or sent. You can revoke access or uninstall through Chrome.</p>
       <p>Questions? <a href="https://github.com/Aha85/meh2/issues" target="_blank" rel="noopener noreferrer">Open an issue on GitHub</a>.</p>
     </section>
   </main>

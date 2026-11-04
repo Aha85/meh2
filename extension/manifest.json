@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MEH MODE",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "minimum_chrome_version": "120",
   "description": "Make social media bland. Grayscale your chosen sites, set a daily limit, and get nudges when your time runs out.",
   "permissions": [

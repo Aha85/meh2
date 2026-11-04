@@ -1,6 +1,6 @@
 import { PLATFORMS, originsFor, platformForUrl, platformById } from "../platforms/index.js";
 import { normalizeSettings } from "./settings.js";
-import { handleTab, handlePanel, forgetTab } from "./meh2.js";
+import { handleTab, handlePanel, forgetTab, pausedSites } from "./meh2.js";
 
 const popupUrl = chrome.runtime.getURL("popup/popup.html");
 void (async () => {
@@ -102,7 +102,7 @@ async function model(windowId) {
   const [tab] = await chrome.tabs.query({ active: true, ...(Number.isInteger(windowId) ? { windowId } : { currentWindow: true }) });
   const platform = platformForUrl(tab?.url);
   return {
-    ok: true, settings, needsReload, activeTabId: tab?.id ?? null,
+    ok: true, settings, needsReload, paused: await pausedSites(), activeTabId: tab?.id ?? null,
     current: platform ? { tabId: tab.id, platformId: platform.id, label: platform.label } : null
   };
 }
@@ -120,7 +120,7 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
     void (async () => {
       try {
         const { enabled, platformId } = await eligibility(sender);
-        if (!enabled) { respond({ ok: false, mode: "off" }); return; }
+        if (!enabled || platformId in await pausedSites()) { respond({ ok: false, mode: "off" }); return; }
         if (message.type === "MEH2_PING") { respond({ ok: true }); return; }
         respond(await serial(() => handleTab(message, sender.tab.id, platformId)));
       } catch { respond({ ok: false, mode: "off" }); }
@@ -129,7 +129,12 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   }
   if (sender.url !== popupUrl || sender.tab) return;
   let operation;
-  if (message.type.startsWith("MEH2_")) operation = () => handlePanel(message);
+  if (message.type === "MEH2_PAUSE" || message.type === "MEH2_RESUME") {
+    if (!platformById(message.id)) return;
+    // reconcile tells open tabs to check in, so the change applies without a reload.
+    operation = async () => { const result = await handlePanel(message); await reconcile(); return result; };
+  }
+  else if (message.type.startsWith("MEH2_")) operation = () => handlePanel(message);
   else if (message.type === "MEH_MODEL") operation = () => model(message.windowId);
   else if (message.type === "MEH_SET") operation = () => setPlatform(message.id, message.enabled);
   else if (message.type === "MEH_RESET") operation = () => { throw new Error("Manage extension access in Chrome settings."); };

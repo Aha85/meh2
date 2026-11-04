@@ -20,11 +20,10 @@ Feeds are built to be bright: red badges, colorful thumbnails, flashy promos. ME
 - **Questions at the door.** Each visit starts with what you're here for and one sentence about it. Past 50% and 80% of your daily time, there are more questions. Past 80% there is also a one-minute wait.
 - **A daily limit and a visit limit.** You set both. Defaults: 45 minutes a day, 5 minutes a visit.
 - **Nudges when time is up.** A popup jumps up, then keeps coming back more often. You can always close it. Nothing is blocked.
-- **Turning it off takes a sentence.** To switch a site off, you write why you need color. It stays off for that visit only. Next time, it's gray again.
+- **A live timer.** A small timer on the page shows what is left of this visit and of today. Drag it where you like, or shrink it. The panel shows the same numbers.
+- **Turning the limits off takes a sentence.** To switch a site off, you write why. The questions, nudges and timer stop on that site until the next daily reset, then they come back by themselves. The gray stays: hold the button to peek in color.
 
 ![Holding the button shows color only while held](screenshots/2-hold-to-peek.png)
-
-![Turning a site off asks what you're here to do](screenshots/3-turn-off-question.png)
 
 ## The settings panel
 
@@ -37,7 +36,7 @@ Click the MEH MODE icon to open the panel.
 - **Day resets at:** the hour your daily time starts over.
 - **On-page language:** English or Hebrew, for the questions and nudges.
 - **Save limits:** your first save applies now. Later changes start at the next reset, so today's limits stay fixed.
-- **Where to meh:** switch on the sites you want.
+- **Where to meh:** switch on the sites you want. Switching one off opens a box right below the list asking why. Write your answer and click **Turn off until reset**. The switch then reads "Off until 5:00" (or your reset hour). Switch it back on any time to bring the limits back. If you reload the page before you confirm, the box closes and the switch goes back to On.
 
 ![The question shown when you enter a site](screenshots/5-entry-question.png)
 
@@ -52,6 +51,14 @@ Short studies on grayscale phones motivated this experiment:
 - Adding a short moment of friction before opening an app reduced how often people opened it. ([Grüning et al., PNAS 2023](https://doi.org/10.1073/pnas.2213114120))
 
 **Honest limits:** these studies looked at phones, not desktop social media, and at different kinds of friction. MEH MODE itself has not been tested in a study, and neither have its limits or nudges. It does not "reset your dopamine" or cure anything. It's a simple tool worth trying.
+
+## What's new in v0.4.12
+
+- Switching a site off now turns off its **limits** (questions, nudges, timer) until the next daily reset, instead of removing gray for one visit. Gray always stays; use **Hold to peek in color**.
+- The "why" box now opens under the list of sites, and names the site you are turning off.
+- The switch shows when the site comes back, for example "Off until 5:00".
+
+To update from an older version: download the zip again, replace your old `extension` folder with the new one, then open `chrome://extensions` and click the reload icon on MEH MODE.
 
 ## Install (about 2 minutes)
 

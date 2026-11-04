@@ -10,12 +10,13 @@ let port = null;
 let documentToken = null;
 let connectionVersion = 0;
 let ready = false;
-let visitOff = false;
+let pausing = null; // site whose question is open
 let busy = false;
 let refreshVersion = 0;
 let refreshing = false;
 const rows = new Map();
 
+const RELOAD_NOTE = "Some open pages need a reload to apply MEH MODE.";
 const error = message => { $("error").textContent = message || ""; $("error").hidden = !message; };
 async function request(message) {
   const result = await chrome.runtime.sendMessage(message);
@@ -36,7 +37,6 @@ const hold = new Hold({
 function statusText() {
   if (!model?.current) return "Not active on this page.";
   if (!model.settings.platforms[model.current.platformId].enabled) return "Off for this site.";
-  if (ready && visitOff) return "Off for this visit. Reload to return to grayscale.";
   return ready ? model.current.label + " is appropriately meh." : "Reload this page to connect MEH MODE.";
 }
 function disconnect() {
@@ -63,10 +63,8 @@ function connect() {
     if (port !== incoming || version !== connectionVersion) return;
     if (message?.type === "READY") {
       ready = message.enabled === true;
-      visitOff = message.visitOff === true;
       documentToken = message.documentToken;
       updateControls();
-      if (visitOff) closeQuestion();
       if (!hold.active) $("current-status").textContent = statusText();
     } else if (message?.type === "PEEKING" && hold.active?.token === message.token) {
       $("current-status").textContent = "Peeking in color. Keep holding.";
@@ -98,20 +96,25 @@ async function refresh() {
     let count = 0;
     for (const platform of PLATFORMS) {
       const on = model.settings.platforms[platform.id].enabled;
-      const row = rows.get(platform.id);
-      row.input.checked = on;
-      row.state.textContent = on ? "On" : "Off";
       if (on) count++;
     }
+    updateControls();
     $("site-summary").textContent = count ? count + (count === 1 ? " site selected" : " sites selected") : "All off";
     $("first-run").hidden = count > 0;
-    if (next.needsReload) error("Some open pages need a reload to apply MEH MODE.");
+    if (next.needsReload) error(RELOAD_NOTE);
+    else if ($("error").textContent === RELOAD_NOTE) error("");
     connect();
   } catch (cause) {
     if (version !== refreshVersion) return;
     refreshing = false;
     disconnect(); error(cause.message);
   }
+}
+async function setPause(type, id) {
+  setBusy(true);
+  try { await request({ type, id }); closeQuestion(); }
+  catch (cause) { error(cause.message); }
+  finally { await refresh(); setBusy(false); }
 }
 function setBusy(value) {
   busy = value;
@@ -120,16 +123,16 @@ function setBusy(value) {
 function updateControls() {
   for (const [id, row] of rows) {
     const enrolled = model?.settings.platforms[id].enabled === true;
-    const current = model?.current?.platformId === id;
-    row.input.checked = enrolled && !(current && ready && visitOff);
-    row.state.textContent = row.input.checked ? "On" : "Off";
-    row.input.disabled = busy || refreshing || (enrolled && (!current || !ready));
-    row.input.title = enrolled && !current ? "Open this site to turn MEH off for a visit." : "";
+    const until = enrolled ? model?.paused?.[id] : undefined;
+    row.input.checked = enrolled && !until && pausing !== id;
+    row.state.textContent = until ? "Off until " + new Date(until).getHours() + ":00" : row.input.checked ? "On" : "Off";
+    row.input.disabled = busy || refreshing;
   }
-  peek.disabled = busy || !ready || visitOff;
-  $("confirm-pause").disabled = busy || refreshing || !ready || !$("reason").value.trim();
+  peek.disabled = busy || !ready;
+  $("confirm-pause").disabled = busy || refreshing || !pausing || !$("reason").value.trim();
 }
 function closeQuestion() {
+  pausing = null;
   $("pause-form").hidden = true;
   $("reason").value = "";
   updateControls();
@@ -150,13 +153,16 @@ for (const platform of PLATFORMS) {
     const enabled = input.checked;
     if (model?.settings.platforms[platform.id].enabled) {
       hold.stop(); error("");
-      if (!ready || model.current?.platformId !== platform.id) { updateControls(); return; }
-      if (enabled && visitOff) send({ type: "RESUME_VISIT", documentToken });
-      else {
-        $("pause-form").hidden = false;
-        $("reason").focus();
-        $("pause-form").scrollIntoView({ block: "nearest" });
+      if (enabled) {
+        if (model.paused[platform.id]) await setPause("MEH2_RESUME", platform.id);
+        else closeQuestion(); // switched back while the question was open
+        return;
       }
+      pausing = platform.id;
+      $("reason-label").textContent = "Why turn off the limits on " + platform.label + "?";
+      $("pause-form").hidden = false;
+      $("reason").focus();
+      $("pause-form").scrollIntoView({ block: "nearest" });
       updateControls();
       return;
     }
@@ -172,7 +178,7 @@ for (const platform of PLATFORMS) {
   });
 }
 peek.addEventListener("pointerdown", event => {
-  if (event.button !== 0 || !event.isPrimary || !ready || visitOff || busy) return;
+  if (event.button !== 0 || !event.isPrimary || !ready || busy) return;
   event.preventDefault();
   peek.focus();
   peek.setPointerCapture(event.pointerId);
@@ -184,7 +190,7 @@ for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
 peek.addEventListener("keydown", event => {
   if (![" ", "Enter"].includes(event.key)) return;
   event.preventDefault();
-  if (!event.repeat && ready && !visitOff && !busy) hold.start("key:" + event.key);
+  if (!event.repeat && ready && !busy) hold.start("key:" + event.key);
 });
 window.addEventListener("keyup", event => hold.stop("key:" + event.key), true);
 window.addEventListener("keydown", event => { if (event.key === "Escape") hold.stop(); }, true);
@@ -201,7 +207,6 @@ function changeContext() {
   refreshVersion++;
   disconnect();
   model = null;
-  visitOff = false;
   closeQuestion();
   error("");
   void refresh();
@@ -220,14 +225,12 @@ $("about-toggle").addEventListener("click", () => {
   $("about-toggle").setAttribute("aria-expanded", String(!$("about").hidden));
 });
 $("reason").addEventListener("input", updateControls);
-$("cancel-pause").addEventListener("click", () => { closeQuestion(); rows.get(model.current.platformId).input.focus(); });
+$("cancel-pause").addEventListener("click", () => { const id = pausing; closeQuestion(); rows.get(id)?.input.focus(); });
 $("pause-form").addEventListener("submit", event => {
   event.preventDefault();
-  if (!ready || busy || !$("reason").value.trim()) return;
+  if (!pausing || busy || !$("reason").value.trim()) return;
   hold.stop();
-  send({ type: "PAUSE_VISIT", documentToken });
-  $("reason").value = "";
-  updateControls();
+  void setPause("MEH2_PAUSE", pausing);
 });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.settings && !busy) void refresh();
